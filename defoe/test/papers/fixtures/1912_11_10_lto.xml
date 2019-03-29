@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE issue SYSTEM "LTO_issue.dtd">
+<issue>
+    <id>NID123-1912-NOV10</id>
+    <is>1</is>
+    <da>November 10, 1912</da>
+    <pf>19121110</pf>
+    <ip>1</ip>
+    <article>
+        <id>NID123-1912-NOV10-001-001</id>
+        <ocr>0</ocr>
+        <pi pgref="1">NID123-1912-NOV10-001</pi>
+        <text>
+            <text.title>
+                <p>
+                    <wd>Article 1 Title</wd>
+                </p>
+            </text.title>
+            <text.cr>
+                <p>
+                     <wd>A</wd>
+                </p>
+                <p>
+                    <wd>B</wd>
+                    <wd>C</wd>
+                </p>
+                <p>
+                    <wd>D</wd>
+                    <wd>E</wd>
+                    <wd>F</wd>
+                </p>
+            </text.cr>
+        </text>
+    </article>
+    <article>
+        <id>NID123-1912-NOV10-001-002</id>
+        <ocr>0</ocr>
+        <pi pgref="1">NID123-1912-NOV10-001</pi>
+        <text>
+            <text.title>
+                <p>
+                    <wd>Article 2 Title</wd>
+                </p>
+            </text.title>
+            <text.cr>
+                <p>
+                    <wd>G</wd>
+                </p>
+                <p>
+                    <wd>H</wd>
+                    <wd>I</wd>
+                </p>
+                <p>
+                    <wd>J</wd>
+                    <wd>K</wd>
+                    <wd>L</wd>
+                </p>
+            </text.cr>
+        </text>
+    </article>
+    <article>
+        <id>NID123-1912-NOV10-001-003</id>
+        <ocr>0</ocr>
+        <pi pgref="1">NID123-1912-NOV10-001</pi>
+        <text>
+            <text.title>
+                <p>
+                    <wd>Article 3 Title</wd>
+                </p>
+            </text.title>
+            <text.cr>
+                <p>
+                    <wd>M</wd>
+                </p>
+                <p>
+                    <wd>N</wd>
+                    <wd>O</wd>
+                </p>
+                <p>
+                    <wd>P</wd>
+                    <wd>Q</wd>
+                    <wd>R</wd>
+                </p>
+            </text.cr>
+        </text>
+    </article>
+</issue>

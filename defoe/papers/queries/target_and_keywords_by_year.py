@@ -1,9 +1,14 @@
 """
 Counts number of articles containing both a target word and one or
 more keywords and groups by year.
+
+Words in articles, target words and keywords can be normalized,
+normalized and stemmed, or normalized and lemmatized (default).
 """
 
+import os.path
 from operator import add
+import yaml
 
 from defoe import query_utils
 from defoe.papers.query_utils import article_contains_word
@@ -15,29 +20,35 @@ def do_query(issues, config_file=None, logger=None):
     Counts number of articles containing both a target word and one or
     more keywords and groups by year.
 
-    config_file must be the path to a configuration file with a target
-    word and a list of one or more keywords to search for, one per
-    line.
+    Words in articles, target words and keywords can be normalized,
+    normalized and stemmed, or normalized and lemmatized (default).
 
-    Target word, keywords and words in documents are normalized, by
-    removing all non-'a-z|A-Z' characters.
+    config_file must be the path to a configuration file of form:
+
+        preprocess: none|normalize|stem|lemmatize # Optional
+        data: <DATA_FILE>
+
+    <DATA_FILE> must be the path to a plain-text data file with a list
+    of keywords to search for, one per line. The first word is assumed
+    to be the target word. If <DATA_FILE> is a relative path then it
+    is assumed to be relative to the directory in which config_file
+    resides.
 
     Returns result of form:
 
-        <YEAR>:
-        - {
-            "target": <WORD>,
-            "words": [<WORD>, <WORD>, ...],
-            "count": <COUNT>
-          }
-        - {
-            "target": <WORD>,
-            "words": [<WORD>, <WORD>, ...],
-            "count": <COUNT>
-          }
-        - ...
-        <YEAR>:
-        ...
+        {
+          <YEAR>:
+          [
+            {
+              "target_word": <WORD>,
+              "words": [<WORD>, <WORD>, ...],
+              "count": <COUNT>
+            },
+            ...
+          ],
+          <YEAR>:
+          ...
+        }
 
     :param issues: RDD of defoe.papers.issue.Issue
     :type issues: pyspark.rdd.PipelinedRDD
@@ -48,9 +59,15 @@ def do_query(issues, config_file=None, logger=None):
     :return: number of occurrences of keywords grouped by year
     :rtype: dict
     """
-    keywords = []
     with open(config_file, "r") as f:
-        keywords = [query_utils.normalize(word) for word in list(f)]
+        config = yaml.load(f)
+    preprocess_type = query_utils.extract_preprocess_word_type(config)
+    data_file = query_utils.extract_data_file(config,
+                                              os.path.dirname(config_file))
+    keywords = []
+    with open(data_file, 'r') as f:
+        keywords = [query_utils.preprocess_word(word, preprocess_type)
+                    for word in list(f)]
 
     target_word = keywords[0]
     keywords = keywords[1:]
@@ -62,12 +79,14 @@ def do_query(issues, config_file=None, logger=None):
     # [(year, article), ...]
     target_articles = articles.filter(
         lambda year_article: article_contains_word(
-            year_article[1], target_word))
+            year_article[1], target_word, preprocess_type))
     # [((year, [word, word, ...]), 1), ...]
     words = target_articles.map(
         lambda year_article: (
             (year_article[0],
-             get_article_keywords(year_article[1], keywords)),
+             get_article_keywords(year_article[1],
+                                  keywords,
+                                  preprocess_type)),
             1))
     # [((year, [word, word, ...]), 1), ...]
     match_words = words.filter(

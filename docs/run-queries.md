@@ -18,9 +18,11 @@ where:
 
 * `<DATA_FILE>` is a file that lists either URLs or file paths which are the files over which the query is to be run, one per line. Either URLs or file paths should be exclusively used, not both.
 * `<MODEL_NAME>` specifies which text model is to be used, one of:
-  -  `books`: British Library Books
+  - `books`: British Library Books
   - `papers`: British Library Newspapers
   - `fmp`: Find My Past Newspapers
+  - `nzpp`: Papers Past New Zealand and Pacific newspapers
+  - `generic_xml`: Arbitrary XML documents
   - For example, `books` tells the code that the data files listed in `data.txt` are books so should be parsed into a books data model.
 * `<QUERY_NAME>` is the name of a Python module implementing the query to run, for example `defoe.alto.queries.find_words_group_by_word` or `defoe.papers.queries.articles_containing_words`. The query must be compatible with the chosen model.
 * `<QUERY_CONFIG_FILE>` is a query-specific configuration file. This is optional and depends on the query implementation.
@@ -69,6 +71,21 @@ To submit a job to Spark as a background process, meaning you can do other thing
 nohup spark-submit --py-files defoe.zip defoe/run_query.py <DATA_FILE> <MODEL_NAME> <QUERY_NAME> <QUERY_CONFIG_FILE> [-r <RESULTS_FILE>] [-n <NUM_CORES>] > log.txt &
 ```
 
+You can expect to see at least one `python` and one `java` process:
+
+```bash
+ps
+```
+```
+   PID TTY          TIME CMD
+...
+ 92250 pts/1    00:00:02 java
+ 92368 pts/1    00:00:00 python
+...
+```
+
+**Caution:** If you see `<RESULTS_FILE>` then do not assume that the query has completed and prematurely copy or otherwise try to use that file. If there are many query results then it may take a while for these to be written to the file after it is opened. Check that the background job has completed before using `<RESULTS_FILE>`. 
+
 ---
 
 ## Check if any data files were skipped due to errors
@@ -76,8 +93,24 @@ nohup spark-submit --py-files defoe.zip defoe/run_query.py <DATA_FILE> <MODEL_NA
 If any problems arise in reading data files or converting these into objects before running queries then an attempt will be made to capture these errors and record them in the errors file (default name `errors.yml`). If present, this file provides a list of the problematic files and the errors that arose. For example:
 
 ```
-- [/mnt/lustre/<user>/data/book.zip, File is not a zip file]
-- [/mnt/lustre/<user>/data/sample-book.zip, '[Errno 2] No such file or directory: ''sample-book.zip'
+- [/mnt/lustre/<project>/<project>/<username>/data/book.zip, File is not a zip file]
+- [/mnt/lustre/<project>/<project>/<username>/data/sample-book.zip, '[Errno 2] No such file or directory: ''sample-book.zip'
+```
+
+---
+
+## Get Application ID
+
+A quick-and-dirty way to get the Spark application ID is, if you have used `nohup` and output capture to `log.txt`, to run:
+
+```bash
+grep Framework\ registered log.txt
+```
+
+For example:
+
+```
+I0125 09:07:58.364142 188697 sched.cpp:743] Framework registered with 6646eaa2-999d-4c87-a657-d4109b4f120b-0691
 ```
 
 ---
@@ -144,7 +177,7 @@ then check that the files the query is being run over exist.
 If the files are on the local file system then also check their permissions. This error can arise if, for example, a data file has permissions like:
 
 ```bash
-ls -l /mnt/lustre/<user>/blpaper/0000164_19010101.xml
+ls -l /mnt/lustre/<project>/<project>/<user>/blpaper/0000164_19010101.xml
 ```
 ```
 ---------- 1 <user> at01 3374189 May 31 13:57

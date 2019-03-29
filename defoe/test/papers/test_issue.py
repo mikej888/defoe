@@ -4,22 +4,13 @@ defoe.papers.issue.Issue tests.
 
 from unittest import TestCase
 
-from defoe.papers.issue import Issue
-from defoe.file_utils import get_path
-from defoe.test.papers import fixtures
-
 
 class TestIssue(TestCase):
     """
     defoe.papers.issue.Issue tests.
     """
 
-    def setUp(self):
-        """
-        Creates Issue from test file fixtures/1912_11_10.xml.
-        """
-        self.filename = get_path(fixtures, '1912_11_10.xml')
-        self.issue = Issue(self.filename)
+    __test__ = False
 
     def test_filename(self):
         """
@@ -32,7 +23,7 @@ class TestIssue(TestCase):
         Tests Issue.newspaper_id attribute holds expected newspaper
         ID.
         """
-        self.assertEqual('NID123', self.issue.newspaper_id)
+        self.assertEqual(self.issue_id, self.issue.newspaper_id)
 
     def test_date(self):
         """
@@ -47,12 +38,6 @@ class TestIssue(TestCase):
         Tests Issue.page_count attribute holds expected page count.
         """
         self.assertEqual(1, self.issue.page_count)
-
-    def test_day_of_week(self):
-        """
-        Tests Issue.day_of_week attribute holds expected day of week.
-        """
-        self.assertEqual('Monday', self.issue.day_of_week)
 
     def test_articles_number(self):
         """
